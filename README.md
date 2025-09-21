@@ -1,25 +1,35 @@
-# Model Context Protocol (MCP) Server + Access OAuth
+# Model Context Protocol (MCP) Server + Access OAuth Template
 
-This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server that supports remote MCP connections, with Access OAuth built-in.
+This is a template for a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server that supports remote MCP connections, with Access OAuth built-in and container-based mcp-proxy.
+
+**Key Feature**: You can run any stdio MCP server in a container and protect it with Cloudflare ZeroTrust Access.
 
 You can deploy it to your own Cloudflare account, and after you create your own Access for SaaS OIDC app, you'll have a fully functional remote MCP server that you can build off. Users will be able to connect to your MCP server by signing in with your connected Access Identity Provider.
 
-The MCP server (powered by [Cloudflare Workers](https://developers.cloudflare.com/workers/)):
-
-- Acts as OAuth _Server_ to your MCP clients
-- Acts as OAuth _Client_ to your _real_ OAuth server (in this case, Access)
-
 ## Getting Started
 
-Clone the repo & install dependencies: `npm install`
+Create a new worker from this template:
+
+```bash
+npm create cloudflare@latest -- test-mcp --template=de4ps/secure-mcp-server
+```
+
+Then install dependencies: `npm install`
 
 ### For Production
 
 Create a new [Access for SaaS OIDC App](https://developers.cloudflare.com/cloudflare-one/applications/configure-apps/saas-apps/generic-oidc-saas/):
 
-- For the Authorization callback URL, specify `https://mcp-access-oauth.<your-subdomain>.workers.dev/callback` and `http://localhost:8788/callback` if you are developing locally.
+- For the Authorization callback URL, specify `https://secure-mcp-server.<your-subdomain>.workers.dev/callback` and `http://localhost:8788/callback` if you are developing locally.
 - Note your Client ID and Client secret.
-- Set secrets via Wrangler
+- Put the secrets in `.env` file after creating the application
+- Set secrets via Wrangler using the provided script:
+
+```bash
+./infra/put-secrets.sh
+```
+
+Or manually:
 
 ```bash
 wrangler secret put ACCESS_CLIENT_ID
@@ -47,7 +57,7 @@ Test the remote server using [Inspector](https://modelcontextprotocol.io/docs/to
 npx @modelcontextprotocol/inspector@latest
 ```
 
-Enter `https://mcp-access-oauth.<your-subdomain>.workers.dev/sse` and hit connect. Once you go through the authentication flow, you'll see the Tools working:
+Enter `https://secure-mcp-server.<your-subdomain>.workers.dev/sse` and hit connect. Once you go through the authentication flow, you'll see the Tools working:
 
 <img width="640" alt="image" src="https://github.com/user-attachments/assets/7973f392-0a9d-4712-b679-6dd23f824287" />
 
@@ -55,14 +65,7 @@ You now have a remote MCP server deployed!
 
 ### Access Control
 
-This MCP server uses Access for authentication. All authenticated Access users can access basic tools like "add".
-
-The "generateImage" tool is restricted to specific Access users listed in the `ALLOWED_USERNAMES` configuration:
-
-```typescript
-// Add user emails for image generation access
-const ALLOWED_EMAILS = new Set(['employee1@mycompany.com', 'teammate1@mycompany.com'])
-```
+This MCP server uses Cloudflare ZeroTrust Access for authentication and authorization. Access control is managed through Cloudflare ZeroTrust Policy rather than hardcoded configurations in the code.
 
 ### Access the remote MCP server from Claude Desktop
 
@@ -77,7 +80,7 @@ Replace the content with the following configuration. Once you restart Claude De
       "command": "npx",
       "args": [
         "mcp-remote",
-        "https://mcp-access-oauth.<your-subdomain>.workers.dev/sse"
+        "https://secure-mcp-server.<your-subdomain>.workers.dev/sse"
       ]
     }
   }
