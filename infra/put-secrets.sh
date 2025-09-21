@@ -1,18 +1,18 @@
 #!/bin/bash
 
-# Script to put secrets from .env to Cloudflare Workers using wrangler
+# Script to put secrets from .dev.vars to Cloudflare Workers using wrangler
 # Based on the static list from .dev.vars.example
 
 set -e
 
-# Check if .env file exists
-if [ ! -f ".env" ]; then
-    echo "Error: .env file not found"
+# Check if .dev.vars file exists
+if [ ! -f ".dev.vars" ]; then
+    echo "Error: .dev.vars file not found"
     exit 1
 fi
 
-# Source the .env file to load variables
-source .env
+# Source the .dev.vars file to load variables
+source .dev.vars
 
 # Static list of variables from .dev.vars.example
 VARIABLES=(
@@ -32,7 +32,7 @@ for var in "${VARIABLES[@]}"; do
         echo "Putting secret: $var"
         echo "${!var}" | npx wrangler secret put "$var"
     else
-        echo "Warning: $var is not set in .env, skipping..."
+        echo "Warning: $var is not set in .dev.vars, skipping..."
     fi
 done
 
