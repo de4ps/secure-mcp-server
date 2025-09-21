@@ -14,7 +14,7 @@ async function handleMcpRequest(req: Request, env: Env, ctx: ExecutionContext) {
 
 export default new OAuthProvider({
 	apiHandler: { fetch: handleMcpRequest as any },
-	apiRoute: ["/*"],
+	apiRoute: ["/sse", "/mcp"],
 	authorizeEndpoint: "/authorize",
 	clientRegistrationEndpoint: "/register",
 	defaultHandler: { fetch: handleAccessRequest as any },
