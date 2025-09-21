@@ -8,13 +8,20 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "mcp-server-cf-access",
+	"name": "secure-mcp-server",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-03-10",
+	"containers": [
+		{
+			"class_name": "MyContainer",
+			"image": "./Dockerfile",
+			"max_instances": 1
+		}
+	],
 	"migrations": [
 		{
 			"new_sqlite_classes": [
-				"MyMCP"
+				"MyContainer"
 			],
 			"tag": "v1"
 		}
@@ -25,8 +32,8 @@
 	"durable_objects": {
 		"bindings": [
 			{
-				"class_name": "MyMCP",
-				"name": "MCP_OBJECT"
+				"class_name": "MyContainer",
+				"name": "MY_CONTAINER"
 			}
 		]
 	},
